@@ -5,26 +5,385 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Marketing Mood Booster</title>
     <style>
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%); margin: 0; padding: 20px; min-height: 100vh; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 2.5rem; color: #1f2937; margin: 10px 0; }
-        .card { background: white; border-radius: 15px; padding: 40px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin: 10px 0;
+        }
+        .header-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .content-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 30px;
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .category-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .bg-red { background: #ef4444; color: white; }
+        .bg-yellow { background: #eab308; color: white; }
+        .bg-blue { background: #3b82f6; color: white; }
+        .bg-purple { background: #a855f7; color: white; }
+        .bg-green { background: #10b981; color: white; }
+        .inactive {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .inactive:hover {
+            background: #e5e7eb;
+        }
+        .fade-out {
+            opacity: 0.3;
+            transform: scale(0.98);
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2rem; }
+            .content-text { font-size: 1.1rem; }
+            .card { padding: 20px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="font-size: 3rem;">☕</div>
+            <div class="header-icon">☕</div>
             <h1>Daily Marketing Mood Booster</h1>
             <p>Your daily dose of marketing motivation & humor</p>
         </div>
+
         <div class="card">
             <div style="text-align: center;">
-                <p style="font-size: 1.3rem; color: #374151;">Why did the marketer break up with Excel? Too many cells, not enough connection! 📱</p>
-                <button onclick="alert('More jokes coming soon!')" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Get Another Joke</button>
+                <div id="category-badge" class="category-badge bg-blue">
+                    Loading...
+                </div>
+                
+                <div id="content-container">
+                    <div id="content-text" class="content-text">
+                        Loading your daily inspiration...
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button id="generate-btn" class="btn btn-primary">
+                        <span id="refresh-icon">🔄</span> Get Another
+                    </button>
+                    <button id="share-btn" class="btn btn-success">
+                        📤 Share
+                    </button>
+                </div>
             </div>
         </div>
+
+        <div class="card">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #1f2937;">Quick Categories</h3>
+            <div id="categories" class="categories">
+                <!-- Categories populated by JavaScript -->
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px;">
+            Perfect for morning coffee breaks & pre-meeting energy boosts ⚡
+        </div>
     </div>
+
+    <script>
+        const categories = {
+            'Brand Fails': {
+                icon: '🎯',
+                color: 'bg-red',
+                content: [
+                    "Why did the brand manager bring a ladder to work? To reach their target audience! 🎯",
+                    "Our brand awareness is like my wifi signal - everyone knows it exists, but half the time it doesn't work 📶",
+                    "Brand positioning is like parallel parking - everyone thinks they're good at it until they actually have to do it 🚗",
+                    "Why don't brand guidelines ever get lonely? Because they're always surrounded by violations! 📋",
+                    "A brand without personality is like decaf coffee - technically it exists, but what's the point? ☕"
+                ]
+            },
+            'Campaign Confessions': {
+                icon: '⚡',
+                color: 'bg-yellow',
+                content: [
+                    "Today's campaign performance: Like my Finnish pronunciation - needs work, but we're getting there! 🇫🇮",
+                    "ROI stands for 'Really Optimistic Imagination' - change my mind 💭",
+                    "Our click-through rate is so low, it's basically playing limbo with success 📊",
+                    "Launch day energy: 90% coffee, 10% panic, 100% worth it ⚡",
+                    "Campaign targeting so precise, we managed to reach exactly 3 people... and one was my mom 🎯"
+                ]
+            },
+            'Metric Madness': {
+                icon: '📊',
+                color: 'bg-blue',
+                content: [
+                    "Impressions are like Nordic winters - impressive numbers, but hard to feel the warmth 🌨️",
+                    "Attribution models are like IKEA instructions - everyone interprets them differently 🪑",
+                    "Why did the marketer break up with Excel? Too many cells, not enough connection 📱",
+                    "Our conversion funnel has more leaks than a Finnish sauna roof 🧖‍♂️",
+                    "KPIs: Key Performance Indicators or Keep Praying Intensely? You decide 🙏"
+                ]
+            },
+            'Creative Chaos': {
+                icon: '🎨',
+                color: 'bg-purple',
+                content: [
+                    "Creative brief so vague, even Google Translate gave up 🤷‍♂️",
+                    "Designer's favorite Finnish word: 'Sisu' - because every project needs that stubborn determination 💪",
+                    "Brainstorming sessions: Where good ideas go to get complicated 🧠",
+                    "Our creative process is like Nordic noir - dark, complex, but somehow captivating 🎬",
+                    "Why do marketers love Nordic design? Because minimalism makes small budgets look intentional ✨"
+                ]
+            },
+            'Remote Reality': {
+                icon: '💻',
+                color: 'bg-green',
+                content: [
+                    "Remote work motto: Pajama pants are the new power suit 👔",
+                    "Video call bingo: 'Can you hear me now?' - DRINK! 🍻",
+                    "Home office productivity: 60% work, 40% wondering if that's the neighbor's dog or a delivery truck 🐕",
+                    "Finnish work-life balance: Like our winters - long, dark periods followed by incredible brightness ☀️",
+                    "Slack status: 'Available' (Translation: Caffeinated and ready for chaos) ☕"
+                ]
+            }
+        };
+
+        let currentCategory = '';
+        let currentContent = '';
+        let isAnimating = false;
+
+        function getRandomContent() {
+            const categoryKeys = Object.keys(categories);
+            const randomCategory = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
+            const categoryData = categories[randomCategory];
+            const randomContent = categoryData.content[Math.floor(Math.random() * categoryData.content.length)];
+            
+            return {
+                category: randomCategory,
+                content: randomContent,
+                color: categoryData.color,
+                icon: categoryData.icon
+            };
+        }
+
+        function updateContent(data) {
+            currentCategory = data.category;
+            currentContent = data.content;
+            
+            const badge = document.getElementById('category-badge');
+            const text = document.getElementById('content-text');
+            
+            badge.textContent = data.category;
+            badge.className = `category-badge ${data.color}`;
+            text.textContent = data.content;
+            
+            updateCategoryButtons();
+        }
+
+        function updateCategoryButtons() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            Object.entries(categories).forEach(([name, data]) => {
+                const button = document.createElement('button');
+                const isActive = currentCategory === name;
+                button.className = `category-btn ${isActive ? data.color : 'inactive'}`;
+                button.innerHTML = `${data.icon} ${name}`;
+                
+                button.onclick = () => {
+                    if (isAnimating) return;
+                    
+                    const content = data.content[Math.floor(Math.random() * data.content.length)];
+                    animateContentChange({
+                        category: name,
+                        content: content,
+                        color: data.color,
+                        icon: data.icon
+                    });
+                };
+                
+                container.appendChild(button);
+            });
+        }
+
+        function animateContentChange(newData) {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            const container = document.getElementById('content-container');
+            const refreshIcon = document.getElementById('refresh-icon');
+            const generateBtn = document.getElementById('generate-btn');
+            
+            container.classList.add('fade-out');
+            refreshIcon.classList.add('animate-spin');
+            generateBtn.disabled = true;
+            
+            setTimeout(() => {
+                updateContent(newData);
+                container.classList.remove('fade-out');
+                refreshIcon.classList.remove('animate-spin');
+                generateBtn.disabled = false;
+                isAnimating = false;
+            }, 300);
+        }
+
+        function shareContent() {
+            if (!currentContent) return;
+            
+            const text = `Daily Marketing Mood Booster 🚀\n\n${currentCategory}: ${currentContent}\n\n#MarketingLife #TeamMotivation #Barona`;
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ text: text })) {
+                navigator.share({
+                    title: 'Daily Marketing Mood Booster',
+                    text: text,
+                    url: window.location.href
+                }).catch(() => {
+                    copyToClipboard(text);
+                });
+            } else {
+                copyToClipboard(text);
+            }
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied to clipboard! Ready to paste in Slack, Teams, or anywhere else 📋');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('Copied to clipboard! Ready to paste in Slack, Teams, or anywhere else 📋');
+            } catch (err) {
+                alert('Please manually copy this text:\n\n' + text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Event listeners
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            animateContentChange(getRandomContent());
+        });
+
+        document.getElementById('share-btn').addEventListener('click', shareContent);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateContent(getRandomContent());
+        });
+
+        // Fallback initialization
+        if (document.readyState === 'loading') {
+            // Wait for DOMContentLoaded
+        } else {
+            // DOM is already ready
+            setTimeout(() => {
+                if (!currentContent) {
+                    updateContent(getRandomContent());
+                }
+            }, 100);
+        }
+    </script>
 </body>
 </html>
